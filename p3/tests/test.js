@@ -2,7 +2,8 @@ const { Builder, By, Key, util } = require("selenium-webdriver");
 const assert = require("assert");
 const { accessSync } = require("fs");
 var sunCalc = require('suncalc');
-
+const { Navigator } = require('node-navigator');
+const navigator = new Navigator();
 
 async function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -237,26 +238,22 @@ async function verifyMoonDistance(driver) {
 }
 
 async function main() {
-    let chrome = await new Builder().forBrowser("chrome").build();
+    // let chrome = await new Builder().forBrowser("chrome").build();
     await sleep(300);
     // await verifyFields(chrome);
+    await sleep(300);
     // await verifyAutoLocationAndDistanceToTerrestrialNorthPole(chrome);
     // await verifyMoonDistance(chrome);
     let lon;
     let lat;
-    if (chrome.geolocation) {
-        await chrome.geolocation.getCurrentPosition((position) => {
-
-            lon = position.coords.longitude;
-            lat = position.coords.latitude;
-            console.log("latitude: ", lat);
-            console.log("longitude: ", lon);
-        });
-    }
-   
-    console.log("distance: " + sunCalc.getMoonPosition(new Date(), 4.896029,  52.377956).distance);
-    console.log("latitude: ", lat);
-    console.log("longitude: ", lon);
+    
+    navigator.geolocation.getCurrentPosition((position) => {
+        lon = position.longitude;
+        lat = position.latitude;
+        console.log("latitude: ", lat);
+        console.log("longitude: ", lon);
+        console.log("distance: " + sunCalc.getMoonPosition(new Date(), lat,  lon).distance);
+    });
 }
 
 main()
