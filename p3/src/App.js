@@ -5,17 +5,53 @@ import React from 'react'
 import InputLabel from '@mui/material/InputLabel';
 import FormLabel from '@mui/material/FormLabel';
 import TextField from '@mui/material/TextField';
+import Geocode from 'react-geocode';
 var sunCalc = require('suncalc');
 
+var API_key='AIzaSyD-_iRPdJV5WRTyf2EDbyc-vfbuFTr05W4';
+
+// https://www.npmjs.com/package/react-geocode
 function App() {
   const [longitude, setLongitude] = useState('');
   const [latitude, setLatitude] = useState('');
+  const [status, setStatus] = useState(null);
   const [isCorrectFormat, setIsCorrectFormat] = useState(true);
   const [isMissingFields, setIsMissingFields] = useState(true);
+  const [formattedAddress, setFormattedAddress] = useState('');
+ 
+  Geocode.setApiKey(API_key);
+  Geocode.setLocationType("ROOFTOP");
+  Geocode.enableDebug();
 
   let pattern = new RegExp('^-?([1-8]?[1-9]|[1-9]0)\\.{1}\\d{1,6}');
   const onSubmit = () => {
    
+  }
+
+  const getDistanteMoonAuto = () => {
+    if (!navigator.geolocation) {
+      setStatus('Geolocation is not supported by your browser');
+    } else {
+      setStatus('Locating...');
+      navigator.geolocation.getCurrentPosition((position) => {
+        setStatus(null);
+        console.log(position);
+        setLatitude(position.coords.latitude);
+        setLongitude(position.coords.longitude);
+        Geocode.fromLatLng(position.coords.latitude, position.coords.longitude).then(
+          (response) => {
+            const address = response.results[0].formatted_address;
+            setFormattedAddress(address);
+            console.log("address: ", address);
+          }
+        )
+      }, () => {
+        setStatus('Unable to retrieve your location');
+      });
+    }
+  }
+  const getCurrentLocation = () => {
+    
   }
 
   const validateInformation = () => {
@@ -84,7 +120,8 @@ function App() {
           </button>
 
           <button
-            id="calc-distance-to-moon-manual">
+            id="calc-distance-to-moon-auto"
+            onClick={getDistanteMoonAuto}>
               Calculate Distance to Moon (Automatically)
           </button>
         </div>
@@ -100,8 +137,15 @@ function App() {
             <InputLabel id="auto-longitude">{longitude}</InputLabel>
           </div>
           <div className='App_InformationLabels'>
-            <InputLabel>Location:&nbsp;&nbsp;</InputLabel>
-            <InputLabel id="city">Amsterdam</InputLabel>
+            <FormLabel
+              color='primary'
+              >Location:&nbsp;&nbsp;</FormLabel>
+            <FormLabel 
+              id="city"
+              color='primary'
+              >{formattedAddress}</FormLabel>
+            {/* <InputLabel>Location:&nbsp;&nbsp;</InputLabel>
+            <InputLabel id="city">{formattedAddress}</InputLabel> */}
           </div>
           <div className='App_InformationLabels'>
             <InputLabel>Distance to North Pole:&nbsp;&nbsp;</InputLabel>
