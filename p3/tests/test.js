@@ -168,7 +168,7 @@ async function verifyAutoLocationAndDistanceToTerrestrialNorthPole(driver) {
 
 async function verifyMoonDistance(driver) {   
     await driver.get("http://localhost:3000/");
-    // https://www.latlong.net/
+    
     const locationsAndMoonDistances = [
         {
             latitude: 4.896029,
