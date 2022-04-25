@@ -34,14 +34,14 @@ async function verifyFields(driver) {
         console.log("Error: ", error);
     }
 
-    // correct longitude and latitude format
+    // incorrect longitude and latitude format
     await driver.findElement(By.id("longitude")).sendKeys("abc");
     await driver.findElement(By.id("latitude")).sendKeys("14%2^~.");
     incorrectFormat;
     longitude = await driver.findElement(By.id('longitude')).getAttribute("value");
     latitude = await driver.findElement(By.id('latitude')).getAttribute("value");
     driver.findElement(driver.By.id("find-location")).click();
-    driver.findElement(driver.By.id('incorrect-format')).then(function(webElement) {
+    driver.findElement(driver.By.id('incorrect-format-warning')).then(function(webElement) {
         incorrectFormat = true;
     }, function(err) {
         if (err.state && err.state === 'no such element') {
@@ -127,7 +127,7 @@ async function verifyAutoLocationAndDistanceToTerrestrialNorthPole(driver) {
     await driver.get("http://localhost:3000/");
     
     let test_case2_success=true;
-    driver.findElement(driver.By.id("north-pole-distance")).click();
+    driver.findElement(driver.By.id("north-pole-distance-btn")).click();
     let longitude = await driver.findElement(By.id('auto-longitude')).getAttribute("value");
     let latitude = await driver.findElement(By.id('auto-latitude')).getAttribute("value");
     let northPoleDistance = await driver.findElement(By.id('north-pole-distance')).getAttribute("value");
@@ -247,12 +247,19 @@ async function main() {
     let lon;
     let lat;
     
-    navigator.geolocation.getCurrentPosition((position) => {
+    navigator.geolocation.getCurrentPosition(function (position) {
         lon = position.longitude;
         lat = position.latitude;
         console.log("latitude: ", lat);
         console.log("longitude: ", lon);
-        console.log("distance: " + sunCalc.getMoonPosition(new Date(), lat,  lon).distance);
+        console.log("accuracy: " + position.accuracy);
+        console.log("distance: " + sunCalc.getMoonPosition(new Date(), lat,  lon)["distance"]);
+    }, function (e) {
+        console.log(e);
+    }, {
+        maximumAge:60000,
+        timeout:5000,
+        enableHighAccuracy: true
     });
 }
 
