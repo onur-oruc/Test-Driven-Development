@@ -13,9 +13,11 @@ async function sleep(ms) {
 async function verifyFields(driver) {
     await driver.get("http://localhost:3000/");
     // missing longitude or latitude
+
+    //boths are missing
     let missingWarning;
-    await driver.findElement(By.id("longitude")).sendKeys("");
-    await driver.findElement(By.id("latitude")).sendKeys("");
+    await driver.findElement(By.id("longitude")).clear();
+    await driver.findElement(By.id("latitude")).clear();
     let longitude = await driver.findElement(By.id('longitude')).getAttribute("value");
     let latitude = await driver.findElement(By.id('latitude')).getAttribute("value");
     await driver.findElement(By.id("find-location")).click();
@@ -35,6 +37,8 @@ async function verifyFields(driver) {
     }
 
     // incorrect longitude and latitude format
+    await driver.findElement(By.id("longitude")).clear();
+    await driver.findElement(By.id("latitude")).clear();
     await driver.findElement(By.id("longitude")).sendKeys("abc");
     await driver.findElement(By.id("latitude")).sendKeys("14%2^~.");
     let incorrectFormat;
@@ -49,7 +53,6 @@ async function verifyFields(driver) {
         }
         try {
             assert(incorrectFormat);
-            console.log("incorrect format test is succesful")
         } catch(error) {
             console.log("Error: ", error);
         }
@@ -57,6 +60,8 @@ async function verifyFields(driver) {
 
     // -90 to 90 for latitude and -180 to 180 for longitude.
     // correct longitude latitude
+    await driver.findElement(By.id("longitude")).clear();
+    await driver.findElement(By.id("latitude")).clear();
     await driver.findElement(By.id("longitude")).sendKeys("4.896029");
     await driver.findElement(By.id("latitude")).sendKeys("52.377956");
     longitude = await driver.findElement(By.id('longitude')).getAttribute("value");
@@ -69,7 +74,9 @@ async function verifyFields(driver) {
         console.log("Error: ", error);
     }
 
-    // correct longitude incorrect latitude
+    // correct range of longitude, incorrect range of latitude
+    await driver.findElement(By.id("longitude")).clear();
+    await driver.findElement(By.id("latitude")).clear();
     await driver.findElement(By.id("longitude")).sendKeys("39.411991445");
     await driver.findElement(By.id("latitude")).sendKeys("-190");
     await driver.findElement(By.id("find-location")).click();
@@ -77,12 +84,14 @@ async function verifyFields(driver) {
     latitude = await driver.findElement(By.id('latitude')).getAttribute("value");
     try {
         assert.strictEqual(longitude <= 180 && longitude >=-180, true);
-        assert.strictEqual(latitude <= 90 && latitude >=-90, true);
+        assert.strictEqual(latitude <= 90 && latitude >=-90, false);
     } catch(error) {
         console.log("Error: ", error);
     }
 
     // incorrect range of longitude correct range of latitude
+    await driver.findElement(By.id("longitude")).clear();
+    await driver.findElement(By.id("latitude")).clear();
     await driver.findElement(By.id("longitude")).sendKeys("-190");
     await driver.findElement(By.id("latitude")).sendKeys("38.65886925");
     longitude = await driver.findElement(By.id('longitude')).getAttribute("value");
@@ -96,6 +105,8 @@ async function verifyFields(driver) {
     }
 
     // incorrect range of longitude and latitude
+    await driver.findElement(By.id("longitude")).clear();
+    await driver.findElement(By.id("latitude")).clear();
     await driver.findElement(By.id("longitude")).sendKeys("-200");
     await driver.findElement(By.id("latitude")).sendKeys("-200");
     longitude = await driver.findElement(By.id('longitude')).getAttribute("value");
@@ -109,6 +120,8 @@ async function verifyFields(driver) {
     }
     
     // correct longitude and correct latitude
+    await driver.findElement(By.id("longitude")).clear();
+    await driver.findElement(By.id("latitude")).clear();
     await driver.findElement(By.id("longitude")).sendKeys("4.896029");
     await driver.findElement(By.id("latitude")).sendKeys("52.377956");
     longitude = await driver.findElement(By.id('longitude')).getAttribute("value");
@@ -203,16 +216,16 @@ async function verifyMoonDistance(driver) {
     // manual location
 
     for(let i = 0; i < locationsAndMoonDistances.length; i++) {
-        lon = locationsAndMoonDistances[i].longitude;   
-
-        await driver.findElement(By.id("longitude")).clear;        
+        lon = locationsAndMoonDistances[i].longitude;
+        lat = locationsAndMoonDistances[i].latitude 
+        await driver.findElement(By.id("longitude")).clear();
+        await driver.findElement(By.id("latitude")).clear();       
         await driver.findElement(By.id("longitude")).sendKeys(lon);
-        await driver.findElement(By.id("latitude")).clear;
+
     
-        await driver.findElement(By.id("latitude")).sendKeys(locationsAndMoonDistances[i].latitude);
+        await driver.findElement(By.id("latitude")).sendKeys(lat);
         await driver.findElement(By.id("calc-distance-to-moon-manual")).click();
         distanceToMoon = await driver.findElement(By.id('distance-to-moon')).getAttribute("value");
-
         try {
             assert.strictEqual(distanceToMoon, locationsAndMoonDistances[i].realDistance);
             console.log("test is passed")
@@ -222,7 +235,6 @@ async function verifyMoonDistance(driver) {
         }
     }
     
-
     await sleep(5000)
 
     // auto location
@@ -254,9 +266,9 @@ async function verifyMoonDistance(driver) {
 
 async function main() {
     let chrome = await new Builder().forBrowser("chrome").build();
-    //await verifyFields(chrome);
+    await verifyFields(chrome);
     //await verifyAutoLocationAndDistanceToTerrestrialNorthPole(chrome);
-    await verifyMoonDistance(chrome);
+    //await verifyMoonDistance(chrome);
     // let lon;
     // let lat;
     
