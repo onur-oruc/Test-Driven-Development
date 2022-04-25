@@ -11,9 +11,11 @@ var sunCalc = require('suncalc');
 var API_key='AIzaSyD-_iRPdJV5WRTyf2EDbyc-vfbuFTr05W4';
 
 // https://www.npmjs.com/package/react-geocode
+// https://javascript.plainenglish.io/how-to-use-the-geolocation-api-in-your-react-app-54e87c9c6c94
+
 function App() {
-  const [longitude, setLongitude] = useState('');
   const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState('');
   const [status, setStatus] = useState(null);
   const [isCorrectFormat, setIsCorrectFormat] = useState(true);
   const [isMissingFields, setIsMissingFields] = useState(true);
@@ -23,9 +25,19 @@ function App() {
   Geocode.setLocationType("ROOFTOP");
   Geocode.enableDebug();
 
-  let pattern = new RegExp('^-?([1-8]?[1-9]|[1-9]0)\\.{1}\\d{1,6}');
-  const onSubmit = () => {
-   
+  let pattern = new RegExp('^-?([1-8]?[1-9]|[1-9]0)\\.{1}\\d{1,6}'); // fix this!!!
+  const findLocationBtn = () => {
+    if (!isMissingFields && isCorrectFormat) {
+      console.log("lat: " + typeof(latitude) + " lat: " + latitude);
+      console.log("lng: " + typeof(longitude) + " lng: " + longitude);
+      Geocode.fromLatLng(latitude, longitude).then(
+        (response) => {
+          const address = response.results[0].formatted_address;
+          setFormattedAddress(address);
+          console.log("address: ", address);
+        }
+      )
+    }
   }
 
   const getDistanteMoonAuto = () => {
@@ -49,9 +61,6 @@ function App() {
         setStatus('Unable to retrieve your location');
       });
     }
-  }
-  const getCurrentLocation = () => {
-    
   }
 
   const validateInformation = () => {
@@ -101,13 +110,13 @@ function App() {
             id="incorrect-format-warning"
             color='warning'
             >Latitude and/or Longitude is not in correct form *</FormLabel>):<></>}
-          <button
-            id="find-location"
-            onClick={onSubmit}>
-              Find Location
-          </button>
         </form>
-
+        <button
+          id="find-location"
+          onClick={findLocationBtn}>
+            Find Location
+        </button>
+          
         <div className='App__DistanceButtons'>
           <button
             id="north-pole-distance-btn">
