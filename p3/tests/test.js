@@ -13,13 +13,13 @@ async function verifyFields(driver) {
     await driver.get("http://localhost:3000/");
 
     // missing longitude or latitude
-    missingWarning;
+    let missingWarning;
     await driver.findElement(By.id("longitude")).sendKeys("");
     await driver.findElement(By.id("latitude")).sendKeys("");
     let longitude = await driver.findElement(By.id('longitude')).getAttribute("value");
     let latitude = await driver.findElement(By.id('latitude')).getAttribute("value");
-    driver.findElement(driver.By.id("find-location")).click();
-    driver.findElement(driver.By.id('missing-field')).then(function(webElement) {
+    driver.findElement(By.id("find-location")).click();
+    driver.findElement(By.id('missing-field')).then(function(webElement) {
         missingWarning = true;
     }, function(err) {
         if (err.state && err.state === 'no such element') {
@@ -40,8 +40,8 @@ async function verifyFields(driver) {
     incorrectFormat;
     longitude = await driver.findElement(By.id('longitude')).getAttribute("value");
     latitude = await driver.findElement(By.id('latitude')).getAttribute("value");
-    driver.findElement(driver.By.id("find-location")).click();
-    driver.findElement(driver.By.id('incorrect-format-warning')).then(function(webElement) {
+    driver.findElement(By.id("find-location")).click();
+    driver.findElement(By.id('incorrect-format-warning')).then(function(webElement) {
         incorrectFormat = true;
     }, function(err) {
         if (err.state && err.state === 'no such element') {
@@ -60,7 +60,7 @@ async function verifyFields(driver) {
     await driver.findElement(By.id("latitude")).sendKeys("52.377956");
     longitude = await driver.findElement(By.id('longitude')).getAttribute("value");
     latitude = await driver.findElement(By.id('latitude')).getAttribute("value");
-    driver.findElement(driver.By.id("find-location")).click();
+    driver.findElement(By.id("find-location")).click();
     try {
         assert.strictEqual(longitude <= 180 && longitude >=-180, true);
         assert.strictEqual(latitude <= 90 && latitude >=-90, true);
@@ -73,7 +73,7 @@ async function verifyFields(driver) {
     await driver.findElement(By.id("latitude")).sendKeys("-190");
     longitude = await driver.findElement(By.id('longitude')).getAttribute("value");
     latitude = await driver.findElement(By.id('latitude')).getAttribute("value");
-    driver.findElement(driver.By.id("find-location")).click();
+    driver.findElement(By.id("find-location")).click();
     try {
         assert.strictEqual(longitude <= 180 && longitude >=-180, true);
         assert.strictEqual(latitude <= 90 && latitude >=-90, true);
@@ -86,7 +86,7 @@ async function verifyFields(driver) {
     await driver.findElement(By.id("latitude")).sendKeys("38.65886925");
     longitude = await driver.findElement(By.id('longitude')).getAttribute("value");
     latitude = await driver.findElement(By.id('latitude')).getAttribute("value");
-    driver.findElement(driver.By.id("find-location")).click();
+    driver.findElement(By.id("find-location")).click();
     try {
         assert.strictEqual(longitude <= 180 && longitude >=-180, true);
         assert.strictEqual(latitude <= 90 && latitude >=-90, true);
@@ -99,7 +99,7 @@ async function verifyFields(driver) {
     await driver.findElement(By.id("latitude")).sendKeys("-200");
     longitude = await driver.findElement(By.id('longitude')).getAttribute("value");
     latitude = await driver.findElement(By.id('latitude')).getAttribute("value");
-    driver.findElement(driver.By.id("find-location")).click();
+    driver.findElement(By.id("find-location")).click();
     try {
         assert.strictEqual(longitude <= 180 && longitude >=-180, true);
         assert.strictEqual(latitude <= 90 && latitude >=-90, true);
@@ -112,7 +112,7 @@ async function verifyFields(driver) {
     await driver.findElement(By.id("latitude")).sendKeys("52.377956");
     longitude = await driver.findElement(By.id('longitude')).getAttribute("value");
     latitude = await driver.findElement(By.id('latitude')).getAttribute("value");
-    driver.findElement(driver.By.id("find-location")).click();
+    driver.findElement(By.id("find-location")).click();
     city = await driver.findElement(By.id('city')).getAttribute("value");
     try {
         assert.strictEqual(longitude <= 180 && longitude >=-180, true);
@@ -127,7 +127,7 @@ async function verifyAutoLocationAndDistanceToTerrestrialNorthPole(driver) {
     await driver.get("http://localhost:3000/");
     
     let test_case2_success=true;
-    driver.findElement(driver.By.id("north-pole-distance-btn")).click();
+    driver.findElement(By.id("north-pole-distance-btn")).click();
     let longitude = await driver.findElement(By.id('auto-longitude')).getAttribute("value");
     let latitude = await driver.findElement(By.id('auto-latitude')).getAttribute("value");
     let northPoleDistance = await driver.findElement(By.id('north-pole-distance')).getAttribute("value");
@@ -197,7 +197,7 @@ async function verifyMoonDistance(driver) {
     for (i = 0; i < locationsAndMoonDistances.length(); i++) {
         await driver.findElement(By.id("longitude")).sendKeys(locationsAndMoonDistances[i].longitude);
         await driver.findElement(By.id("latitude")).sendKeys(locationsAndMoonDistances[i].latitude);
-        driver.findElement(driver.By.id("calc-distance-to-moon-manual")).click();
+        driver.findElement(By.id("calc-distance-to-moon-manual")).click();
         let distanceToMoon = await driver.findElement(By.id('distance-to-moon')).getAttribute("value");
 
         try {
@@ -209,7 +209,7 @@ async function verifyMoonDistance(driver) {
     }
 
     // auto location
-    driver.findElement(driver.By.id("calc-distance-to-moon-auto")).click();
+    driver.findElement(By.id("calc-distance-to-moon-auto")).click();
     let longitude = await driver.findElement(By.id('auto-longitude')).getAttribute("value");
     let latitude = await driver.findElement(By.id('auto-latitude')).getAttribute("value");
     let lon;
@@ -234,13 +234,13 @@ async function verifyMoonDistance(driver) {
         console.log("Error: ", error);
         console.log("Error: ", "Auto: Calculated distance to moon does not match real distance to moon");
     }
-    driver.findElement(driver.By.id("calc-distance-to-moon-auto")).click();
+    driver.findElement(By.id("calc-distance-to-moon-auto")).click();
 }
 
 async function main() {
-    // let chrome = await new Builder().forBrowser("chrome").build();
+    let chrome = await new Builder().forBrowser("chrome").build();
     await sleep(300);
-    // await verifyFields(chrome);
+    await verifyFields(chrome);
     await sleep(300);
     // await verifyAutoLocationAndDistanceToTerrestrialNorthPole(chrome);
     // await verifyMoonDistance(chrome);
