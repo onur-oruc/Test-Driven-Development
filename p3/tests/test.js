@@ -4,10 +4,6 @@ var sunCalc = require('suncalc');
 const { Navigator } = require('node-navigator');
 const navigator = new Navigator();
 
-async function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 async function verifyFields(driver) {
     await driver.get("http://localhost:3000/");
     // missing longitude or latitude
