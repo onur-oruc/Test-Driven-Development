@@ -8,7 +8,7 @@ import TextField from '@mui/material/TextField';
 import Geocode from 'react-geocode';
 var sunCalc = require('suncalc');
 const geolib = require('geolib');
-var API_key='AIzaSyD-_iRPdJV5WRTyf2EDbyc-vfbuFTr05W4';
+var API_key='';
 
 // https://www.npmjs.com/package/react-geocode
 // https://javascript.plainenglish.io/how-to-use-the-geolocation-api-in-your-react-app-54e87c9c6c94
