@@ -16,9 +16,9 @@ var API_key='AIzaSyD-_iRPdJV5WRTyf2EDbyc-vfbuFTr05W4';
 function App() {
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
-  const [status, setStatus] = useState(null);
   const [isCorrectFormat, setIsCorrectFormat] = useState(true);
   const [isMissingFields, setIsMissingFields] = useState(true);
+  const [status, setStatus] = useState(null);
   const [formattedAddress, setFormattedAddress] = useState('');
   const [country, setCountry] = useState(null);
   const [distanceToNorthPole, setDistanceToNorthPole] = useState(null);
@@ -171,17 +171,15 @@ function App() {
               Find Location
           </button>
           <button
-            id="north-pole-distance-btn"
-            onClick={calculateDistanceToNorthPole}>
-              Distance to North Pole <br/>(From GPS)
-          </button>
-
-          <button
             id="calc-distance-to-moon-manual"
             onClick={getDistanceMoonFromLatLng}>
               Distance to Moon
           </button>
-
+          <button
+            id="north-pole-distance-btn"
+            onClick={calculateDistanceToNorthPole}>
+              Distance to North Pole <br/>(From GPS)
+          </button>
           <button
             id="calc-distance-to-moon-auto"
             onClick={getDistanteMoonFromGPS}>

@@ -148,6 +148,39 @@ async function verifyFields(driver) {
         console.log("Test case for out of range latitude (positive) failed");
     }
 
+
+    await driver.findElement(By.id("longitude")).clear();
+    await driver.findElement(By.id("latitude")).clear();
+    await driver.findElement(By.id("longitude")).sendKeys("100.411991445");
+    await driver.findElement(By.id("latitude")).sendKeys("85.000000");
+    await driver.findElement(By.id("find-location")).click();
+    longitude = await driver.findElement(By.id('longitude')).getAttribute("value");
+    latitude = await driver.findElement(By.id('latitude')).getAttribute("value");
+    try {
+        assert.strictEqual(longitude <= 180 && longitude >=-180, true);
+        assert.strictEqual(latitude <= 90 && latitude >=-90, false);
+        console.log("Test case for out of range latitude (positive) passed");
+    } catch(error) {
+        console.log("Error: ", error);
+        console.log("Test case for out of range latitude (positive) failed");
+    }
+
+    await driver.findElement(By.id("longitude")).clear();
+    await driver.findElement(By.id("latitude")).clear();
+    await driver.findElement(By.id("longitude")).sendKeys("-100.411991445");
+    await driver.findElement(By.id("latitude")).sendKeys("85.000000");
+    await driver.findElement(By.id("find-location")).click();
+    longitude = await driver.findElement(By.id('longitude')).getAttribute("value");
+    latitude = await driver.findElement(By.id('latitude')).getAttribute("value");
+    try {
+        assert.strictEqual(longitude <= 180 && longitude >=-180, true);
+        assert.strictEqual(latitude <= 90 && latitude >=-90, false);
+        console.log("Test case for out of range latitude (positive) passed");
+    } catch(error) {
+        console.log("Error: ", error);
+        console.log("Test case for out of range latitude (positive) failed");
+    }
+
     // incorrect range of longitude correct range of latitude
     await driver.findElement(By.id("longitude")).clear();
     await driver.findElement(By.id("latitude")).clear();
@@ -189,22 +222,16 @@ async function verifyFields(driver) {
         await driver.findElement(By.id("latitude")).clear();
         await driver.findElement(By.id("latitude")).sendKeys(correctFormattedLatLng[i].latitude);
         await driver.findElement(By.id("longitude")).sendKeys(correctFormattedLatLng[i].longitude);
-        longitude = await driver.findElement(By.id('longitude')).getAttribute("value");
-        latitude = await driver.findElement(By.id('latitude')).getAttribute("value");
         await driver.findElement(By.id("find-location")).click();
 
-        let country = await driver.findElement(By.id('country')).getAttribute("value").then(function(err) {
-            
-        }, function(err) {
+        driver.findElement(By.id('country')).getText().then(function(country) {
             try {
-                assert.strictEqual(longitude <= 180 && longitude >=-180, true);
-                assert.strictEqual(latitude <= 90 && latitude >=-90, true);
                 assert.strictEqual(country, correctFormattedLatLng[i].country);
                 console.log("inside try");
             } catch(error) {
                 console.log("Error: ", error);
                 isCorrectCountry = false;
-                console.log("Test case for country: " + correctFormattedLatLng[i].country+ " failed"); 
+                console.log("Test case for country: " + correctFormattedLatLng[i].country + " failed"); 
             }
         });
     }
