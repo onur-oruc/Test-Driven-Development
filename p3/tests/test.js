@@ -214,27 +214,20 @@ async function verifyAutoLocationAndDistanceToTerrestrialNorthPole(driver) {
     await driver.get("http://localhost:3000/");
     
     let test_case2_success=true;
-    await driver.findElement(By.id("north-pole-distance-btn")).click();
-    let longitude = await driver.findElement(By.id('auto-longitude')).getAttribute("value");
-    let latitude = await driver.findElement(By.id('auto-latitude')).getAttribute("value");
-    let northPoleDistance = await driver.findElement(By.id('north-pole-distance')).getAttribute("value").then(function(err) {
+    await driver.findElement(By.id("north-pole-distance-btn")).click().then(function(err) {
         let lon;
         let lat;
+        let expectedDistance;
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition((position) => {
                 lon = position.longitude;
                 lat = position.latitude;
+                expectedDistance = (90-position.latitude)*111;
             });
         }
-        let expectedDistance = (90-lat)*111;
-        try {
-            assert.strictEqual(longitude, lon);
-            assert.strictEqual(latitude, lat);
-        } catch(error) {
-            console.log("Error: ", error);
-            test_case2_success=false;
-        }
+    });
 
+    let northPoleDistance = await driver.findElement(By.id('north-pole-distance')).getAttribute("value").then(function(err) {
         try {
             assert.strictEqual(northPoleDistance, expectedDistance);
         } catch(error) {
@@ -245,8 +238,10 @@ async function verifyAutoLocationAndDistanceToTerrestrialNorthPole(driver) {
             console.log("Test case 2 passed");
         } else {
             console.log("Test case 2 failed");
-        }
-    });
+        }    
+    }
+    );
+    console.log("end of t2");
 }
 
 
