@@ -28,12 +28,11 @@ function App() {
   Geocode.setLocationType("ROOFTOP");
   Geocode.enableDebug();
 
-  let pattern = new RegExp('^-?([1-8]?[0-9]|[1-9]0)\\.{1}\\d{1,6}'); // fix this!!!
-  function isLatitude(lat) {
+  function isLatitudeFormattedCorrectly(lat) {
     return isFinite(lat) && Math.abs(lat) <= 90;
   }
 
-  function isLongitude(lng) {
+  function isLongitudeFormattedCorrectly(lng) {
     return isFinite(lng) && Math.abs(lng) <= 180;
   }
 
@@ -43,14 +42,9 @@ function App() {
       console.log("lng: " + typeof(longitude) + " lng: " + longitude);
       Geocode.fromLatLng(latitude, longitude).then(
         (response) => {
-          console.dir(response);
           const address = response.results[0].formatted_address;
           setFormattedAddress(address);
-          console.log("address: ", address);
-          var add = response.results[0].formatted_address;
-          var value = add.split(",");
-          var count = value.length;
-          setCountry(value[count-1]);
+          setCountry(getCountryFromFormattedAddress(address));
         }
       )
     }
@@ -75,11 +69,7 @@ function App() {
           (response) => {
             const address = response.results[0].formatted_address;
             setFormattedAddress(address);
-            console.log("address: ", address);
-            var add = response.results[0].formatted_address;
-            var value = add.split(",");
-            var count = value.length;
-            setCountry(value[count-1]);
+            setCountry(getCountryFromFormattedAddress(address));
           }
         )
         console.log("distance to north pole: ", _distanceToNorthPole);
@@ -88,7 +78,13 @@ function App() {
       });
   }
 
-  const getDistanteMoonAuto = () => {
+  const getCountryFromFormattedAddress = (formatted_address) => {
+    var value = formatted_address.split(",");
+    var count = value.length;
+    return value[count-1];
+  }
+
+  const getDistanteMoonFromGPS = () => {
     if (!navigator.geolocation) {
       setStatus('Geolocation is not supported by your browser');
     } else {
@@ -102,11 +98,7 @@ function App() {
           (response) => {
             const address = response.results[0].formatted_address;
             setFormattedAddress(address);
-            console.log("address: ", address);
-            var add = response.results[0].formatted_address;
-            var value = add.split(",");
-            var count = value.length;
-            setCountry(value[count-1]);
+            setCountry(getCountryFromFormattedAddress(address));
           }
         )
         setDistanceToMoon(Math.round(sunCalc.getMoonPosition(new Date(), position.coords.latitude, position.coords.longitude)['distance']));
@@ -116,13 +108,13 @@ function App() {
     }
   }
 
-  const getDistanceMoonCustom = () => {
+  const getDistanceMoonFromLatLng = () => {
     if (!isMissingFields && isCorrectFormat) {
       setDistanceToMoon(Math.round(sunCalc.getMoonPosition(new Date(), latitude, longitude)['distance']));
     }
   }
 
-  const validateInformation = () => {
+  const verifyInformation = () => {
     if (longitude === '' || latitude === '') {
       setIsMissingFields(true);
       return;
@@ -130,7 +122,7 @@ function App() {
     else {
       setIsMissingFields(false);
 
-      if (isLatitude(latitude) && isLongitude(longitude)) {
+      if (isLatitudeFormattedCorrectly(latitude) && isLongitudeFormattedCorrectly(longitude)) {
         // api call
         setIsCorrectFormat(true);
 
@@ -142,7 +134,7 @@ function App() {
   }
 
   useEffect(() => {
-    validateInformation();
+    verifyInformation();
   }, [latitude, longitude]);
 
   return (
@@ -164,35 +156,36 @@ function App() {
           {isMissingFields ? (<FormLabel 
             id="missing-field"
             color='warning'
+            error={true}
             >Latitude and/or Longitude information is missing *</FormLabel>):<></>}
           {!isCorrectFormat ? (<FormLabel 
             id="incorrect-format-warning"
             color='warning'
+            error={true}
             >Latitude and/or Longitude is not in correct form *</FormLabel>):<></>}
-        </form>
-        <button
-          id="find-location"
-          onClick={findLocationBtn}>
-            Find Location
-        </button>
-          
+        </form>          
         <div className='App__DistanceButtons'>
+          <button
+            id="find-location"
+            onClick={findLocationBtn}>
+              Find Location
+          </button>
           <button
             id="north-pole-distance-btn"
             onClick={calculateDistanceToNorthPole}>
-              Distance to North Pole
+              Distance to North Pole <br/>(From GPS)
           </button>
 
           <button
             id="calc-distance-to-moon-manual"
-            onClick={getDistanceMoonCustom}>
+            onClick={getDistanceMoonFromLatLng}>
               Distance to Moon
           </button>
 
           <button
             id="calc-distance-to-moon-auto"
-            onClick={getDistanteMoonAuto}>
-              Calculate Distance to Moon (Automatically)
+            onClick={getDistanteMoonFromGPS}>
+              Calculate Distance to Moon &nbsp;(From GPS)
           </button>
         </div>
         
@@ -217,8 +210,6 @@ function App() {
                 color='primary'
                 value={formattedAddress}
               >{formattedAddress}</FormLabel>
-            {/* <InputLabel>Location:&nbsp;&nbsp;</InputLabel>
-            <InputLabel id="city">{formattedAddress}</InputLabel> */}
           </div>
           <div className='App_InformationLabels'>
             <FormLabel
