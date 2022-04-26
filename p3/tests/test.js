@@ -32,6 +32,7 @@ async function verifyFields(driver) {
         assert.strictEqual(longitude.toString(), "");
         assert.strictEqual(latitude.toString(), "");
         assert.strictEqual(missingWarning, true);
+        console.log("Test case for missing field warning passed");
     } catch(error) {
         console.log("Error: ", error);
     }
@@ -53,6 +54,7 @@ async function verifyFields(driver) {
         }
         try {
             assert(incorrectFormat);
+            console.log("Test case for incorrect format warning passed");
         } catch(error) {
             console.log("Error: ", error);
         }
@@ -60,18 +62,56 @@ async function verifyFields(driver) {
 
     // -90 to 90 for latitude and -180 to 180 for longitude.
     // correct longitude latitude
-    await driver.findElement(By.id("longitude")).clear();
-    await driver.findElement(By.id("latitude")).clear();
-    await driver.findElement(By.id("longitude")).sendKeys("4.896029");
-    await driver.findElement(By.id("latitude")).sendKeys("52.377956");
-    longitude = await driver.findElement(By.id('longitude')).getAttribute("value");
-    latitude = await driver.findElement(By.id('latitude')).getAttribute("value");
-    await driver.findElement(By.id("find-location")).click();
-    try {
-        assert.strictEqual(longitude <= 180 && longitude >=-180, true);
-        assert.strictEqual(latitude <= 90 && latitude >=-90, true);
-    } catch(error) {
-        console.log("Error: ", error);
+    const correctFormattedLatLng = [
+        {
+            latitude: 52.370216,
+            longitude: 4.895168,
+            country: 'Netherlands'
+        },
+        {
+            latitude: 45.440845,
+            longitude: 12.315515,
+            country: 'Italy'
+        },
+        {  
+            latitude: 51.507351,
+            longitude: -0.127758,
+            country: 'UK'
+        },
+        {   
+            latitude: -35.280937,
+            longitude: 149.130005,
+            country: 'Australia'
+        },
+        {
+            latitude: -34.603683,
+            longitude: -58.381557,
+            country: 'Argentina'
+        }
+    ]
+    let isCorrectFormatTestsPassed = true;
+    for(let i = 0; i < correctFormattedLatLng.length; i++) {
+        lon = correctFormattedLatLng[i].longitude;
+        lat = correctFormattedLatLng[i].latitude 
+        await driver.findElement(By.id("longitude")).clear();
+        await driver.findElement(By.id("latitude")).clear();       
+        await driver.findElement(By.id("longitude")).sendKeys(lon);
+        await driver.findElement(By.id("latitude")).sendKeys(lat);
+        longitude = await driver.findElement(By.id('longitude')).getAttribute("value");
+        latitude = await driver.findElement(By.id('latitude')).getAttribute("value");
+        await driver.findElement(By.id("find-location")).click();
+        try {
+            assert.strictEqual(longitude <= 180 && longitude >=-180, true);
+            assert.strictEqual(latitude <= 90 && latitude >=-90, true);
+        } catch(error) {
+            isCorrectFormatTestsPassed = false;
+            console.log("Error: ", error);
+        }
+    }
+    if (isCorrectFormatTestsPassed) {
+        console.log("Test case for correct formatted inputs passed");
+    } else {
+        console.log("Test case for correct formatted inputs failed");
     }
 
     // correct range of longitude, incorrect range of latitude
@@ -85,8 +125,26 @@ async function verifyFields(driver) {
     try {
         assert.strictEqual(longitude <= 180 && longitude >=-180, true);
         assert.strictEqual(latitude <= 90 && latitude >=-90, false);
+        console.log("Test case for out of range latitude (negative) passed");
     } catch(error) {
         console.log("Error: ", error);
+        console.log("Test case for out of range latitude (negative) failed");
+    }
+
+    await driver.findElement(By.id("longitude")).clear();
+    await driver.findElement(By.id("latitude")).clear();
+    await driver.findElement(By.id("longitude")).sendKeys("39.411991445");
+    await driver.findElement(By.id("latitude")).sendKeys("190");
+    await driver.findElement(By.id("find-location")).click();
+    longitude = await driver.findElement(By.id('longitude')).getAttribute("value");
+    latitude = await driver.findElement(By.id('latitude')).getAttribute("value");
+    try {
+        assert.strictEqual(longitude <= 180 && longitude >=-180, true);
+        assert.strictEqual(latitude <= 90 && latitude >=-90, false);
+        console.log("Test case for out of range latitude (positive) passed");
+    } catch(error) {
+        console.log("Error: ", error);
+        console.log("Test case for out of range latitude (positive) failed");
     }
 
     // incorrect range of longitude correct range of latitude
@@ -100,8 +158,10 @@ async function verifyFields(driver) {
     try {
         assert.strictEqual((longitude <= 180) && (longitude >=-180), false);
         assert((latitude <= 90) && (latitude >=-90));
+        console.log("Test case for out of range longitude (negative) passed");
     } catch(error) {
         console.log("Error: ", error);
+        console.log("Test case for out of range longitude (negative) failed");
     }
 
     // incorrect range of longitude and latitude
@@ -115,67 +175,78 @@ async function verifyFields(driver) {
     try {
         assert.strictEqual(longitude <= 180 && longitude >=-180, false);
         assert.strictEqual(latitude <= 90 && latitude >=-90, false);
+        console.log("Test case for out of range latitude and longitude passed");
     } catch(error) {
         console.log("Error: ", error);
+        console.log("Test case for out of range latitude and longitude failed");
     }
     
     // correct longitude and correct latitude
-    await driver.findElement(By.id("longitude")).clear();
-    await driver.findElement(By.id("latitude")).clear();
-    await driver.findElement(By.id("longitude")).sendKeys("4.896029");
-    await driver.findElement(By.id("latitude")).sendKeys("52.377956");
-    longitude = await driver.findElement(By.id('longitude')).getAttribute("value");
-    latitude = await driver.findElement(By.id('latitude')).getAttribute("value");
-    await driver.findElement(By.id("find-location")).click();
-    let city = await driver.findElement(By.id('city')).getAttribute("value").then(function(err) {  
-    }, function(err) {
-        try {
-            assert.strictEqual(longitude <= 180 && longitude >=-180, true);
-            assert.strictEqual(latitude <= 90 && latitude >=-90, true);
-            assert.strictEqual(city, "Amsterdam");
-        } catch(error) {
-            console.log("Error: ", error);
-        }
-    });
-
+    let isCorrectCountry = true;
+    for(let i = 0; i < correctFormattedLatLng.length; i++) {
+        await driver.findElement(By.id("longitude")).clear();
+        await driver.findElement(By.id("latitude")).clear();
+        await driver.findElement(By.id("latitude")).sendKeys(correctFormattedLatLng[i].latitude);
+        await driver.findElement(By.id("longitude")).sendKeys(correctFormattedLatLng[i].longitude);
+        longitude = await driver.findElement(By.id('longitude')).getAttribute("value");
+        latitude = await driver.findElement(By.id('latitude')).getAttribute("value");
+        await driver.findElement(By.id("find-location")).click();
+        let country = await driver.findElement(By.id('country')).getAttribute("value").then(function(err) {  
+        }, function(err) {
+            try {
+                assert.strictEqual(longitude <= 180 && longitude >=-180, true);
+                assert.strictEqual(latitude <= 90 && latitude >=-90, true);
+                assert.strictEqual(country, correctFormattedLatLng[i].country);
+            } catch(error) {
+                console.log("Error: ", error);
+                isCorrectCountry = false;
+                console.log("Test case for country: " + correctFormattedLatLng[i].country+ " failed"); 
+            }
+        });
+    }
+    if (isCorrectCountry) {
+        console.log("Test case for country passed");
+    }
 }
+
 
 async function verifyAutoLocationAndDistanceToTerrestrialNorthPole(driver) {
     await driver.get("http://localhost:3000/");
     
     let test_case2_success=true;
-    await driver.findElement(By.id("north-pole-distance")).click();
+    await driver.findElement(By.id("north-pole-distance-btn")).click();
     let longitude = await driver.findElement(By.id('auto-longitude')).getAttribute("value");
     let latitude = await driver.findElement(By.id('auto-latitude')).getAttribute("value");
-    let northPoleDistance = await driver.findElement(By.id('north-pole-distance')).getAttribute("value");
-    let lon;
-    let lat;
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((position) => {
-            lon = position.longitude;
-            lat = position.latitude;
-        });
-    }
-    try {
-        assert.strictEqual(longitude, lon);
-        assert.strictEqual(latitude, lat);
-    } catch(error) {
-        console.log("Error: ", error);
-        test_case2_success=false;
-    }
+    let northPoleDistance = await driver.findElement(By.id('north-pole-distance')).getAttribute("value").then(function(err) {
+        let lon;
+        let lat;
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                lon = position.longitude;
+                lat = position.latitude;
+            });
+        }
+        let expectedDistance = (90-lat)*111;
+        try {
+            assert.strictEqual(longitude, lon);
+            assert.strictEqual(latitude, lat);
+        } catch(error) {
+            console.log("Error: ", error);
+            test_case2_success=false;
+        }
 
-    try {
-        assert.strictEqual(northPoleDistance, "3,459.30");
-    } catch(error) {
-        console.log("Error: ", error);
-        test_case2_success=false;
-    }
-
-    if (test_case2_success) {
-        console.log("Test case 2 passed");
-    } else {
-        console.log("Test case 2 failed");
-    }
+        try {
+            assert.strictEqual(northPoleDistance, expectedDistance);
+        } catch(error) {
+            console.log("Error: ", error);
+            test_case2_success=false;
+        }
+        if (test_case2_success) {
+            console.log("Test case 2 passed");
+        } else {
+            console.log("Test case 2 failed");
+        }
+    });
 }
 
 
@@ -184,29 +255,29 @@ async function verifyMoonDistance(driver) {
     
     const locationsAndMoonDistances = [
         {
-            latitude: 4.896029,
-            longitude: 52.377956,
-            realDistance: sunCalc.getMoonPosition(new Date(), 4.896029, 52.377956)['distance']
+            latitude: 52.370216,
+            longitude: 4.895168,
+            realDistance: sunCalc.getMoonPosition(new Date(), 52.370216, 4.895168)['distance']
         },
         {
-            latitude: 45.4408,
-            longitude: 12.3155,
-            realDistance: sunCalc.getMoonPosition(new Date(), 45.4408, 12.3155)['distance']
+            latitude: 45.440845,
+            longitude: 12.315515,
+            realDistance: sunCalc.getMoonPosition(new Date(), 45.440845, 12.315515)['distance']
         },
         {  
-            latitude: 36.6592,
-            longitude: 29.1263,
-            realDistance: sunCalc.getMoonPosition(new Date(), 36.6592, 29.1263)['distance']
+            latitude: 51.507351,
+            longitude: -0.127758,
+            realDistance: sunCalc.getMoonPosition(new Date(), 51.507351, -0.127758)['distance']
         },
         {   
-            latitude: 51.5072,
-            longitude: 0.1276,
-            realDistance: sunCalc.getMoonPosition(new Date(), 51.5072, 0.1276)['distance']
+            latitude: -35.280937,
+            longitude: 149.130005,
+            realDistance: sunCalc.getMoonPosition(new Date(), -35.280937, 149.130005)['distance']
         },
         {
-            latitude: 50.4501,
-            longitude: 30.5234,
-            realDistance: sunCalc.getMoonPosition(new Date(), 50.4501, 30.5234)['distance']
+            latitude: -34.603683,
+            longitude: -58.381557,
+            realDistance: sunCalc.getMoonPosition(new Date(), -34.603683, -58.381557)['distance']
         }
     ]
 
@@ -266,8 +337,8 @@ async function verifyMoonDistance(driver) {
 
 async function main() {
     let chrome = await new Builder().forBrowser("chrome").build();
-    await verifyFields(chrome);
-    //await verifyAutoLocationAndDistanceToTerrestrialNorthPole(chrome);
+   // await verifyFields(chrome);
+    await verifyAutoLocationAndDistanceToTerrestrialNorthPole(chrome);
     //await verifyMoonDistance(chrome);
     // let lon;
     // let lat;
