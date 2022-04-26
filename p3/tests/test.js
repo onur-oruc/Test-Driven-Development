@@ -4,6 +4,7 @@ const { accessSync } = require("fs");
 var sunCalc = require('suncalc');
 const { Navigator } = require('node-navigator');
 const { clear } = require("console");
+const { resolve } = require("path");
 const navigator = new Navigator();
 
 async function sleep(ms) {
@@ -191,12 +192,15 @@ async function verifyFields(driver) {
         longitude = await driver.findElement(By.id('longitude')).getAttribute("value");
         latitude = await driver.findElement(By.id('latitude')).getAttribute("value");
         await driver.findElement(By.id("find-location")).click();
-        let country = await driver.findElement(By.id('country')).getAttribute("value").then(function(err) {  
+
+        let country = await driver.findElement(By.id('country')).getAttribute("value").then(function(err) {
+            
         }, function(err) {
             try {
                 assert.strictEqual(longitude <= 180 && longitude >=-180, true);
                 assert.strictEqual(latitude <= 90 && latitude >=-90, true);
                 assert.strictEqual(country, correctFormattedLatLng[i].country);
+                console.log("inside try");
             } catch(error) {
                 console.log("Error: ", error);
                 isCorrectCountry = false;
@@ -212,35 +216,38 @@ async function verifyFields(driver) {
 
 async function verifyAutoLocationAndDistanceToTerrestrialNorthPole(driver) {
     await driver.get("http://localhost:3000/");
-    
+
     let test_case2_success=true;
-    await driver.findElement(By.id("north-pole-distance-btn")).click().then(function(err) {
-        let lon;
-        let lat;
-        let expectedDistance;
+    let lon;
+    let lat;
+    let expectedDistance
+    let northPoleDistance
+    await driver.findElement(By.id("north-pole-distance-btn")).click()
+
+    northPoleDistance = await driver.findElement(By.id('north-pole-distance')).getText().then((response) => {
+        console.log("response: " , response);
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition((position) => {
                 lon = position.longitude;
                 lat = position.latitude;
-                expectedDistance = (90-position.latitude)*111;
+                expectedDistance = (90-lat)*111
+                try {
+                    console.log("real",response)
+                    console.log("expected",expectedDistance)
+                    assert((Math.abs(expectedDistance-response)/expectedDistance)<=1);
+                } catch(error) {
+                    console.log("Error: ", error);
+                    test_case2_success=false;
+                }
+                if (test_case2_success) {
+                    console.log("Test case 2 passed");
+                } else {
+                    console.log("Test case 2 failed");
+                }
             });
         }
-    });
+    })
 
-    let northPoleDistance = await driver.findElement(By.id('north-pole-distance')).getAttribute("value").then(function(err) {
-        try {
-            assert.strictEqual(northPoleDistance, expectedDistance);
-        } catch(error) {
-            console.log("Error: ", error);
-            test_case2_success=false;
-        }
-        if (test_case2_success) {
-            console.log("Test case 2 passed");
-        } else {
-            console.log("Test case 2 failed");
-        }    
-    }
-    );
     console.log("end of t2");
 }
 
@@ -287,52 +294,47 @@ async function verifyMoonDistance(driver) {
         await driver.findElement(By.id("longitude")).clear();
         await driver.findElement(By.id("latitude")).clear();       
         await driver.findElement(By.id("longitude")).sendKeys(lon);
-
-    
         await driver.findElement(By.id("latitude")).sendKeys(lat);
         await driver.findElement(By.id("calc-distance-to-moon-manual")).click();
         distanceToMoon = await driver.findElement(By.id('distance-to-moon')).getAttribute("value");
         try {
-            assert.strictEqual(distanceToMoon, locationsAndMoonDistances[i].realDistance);
-            console.log("test is passed")
+            assert.strictEqual(distanceToMoon, Math.round(locationsAndMoonDistances[i].realDistance).toString());
+            console.log("Test with custom location is passed")
         } catch(error) {
             console.log("Error: ", error);
             console.log("Error: ", "Manuel: Calculated distance to moon does not match real distance to moon");
         }
     }
-    
-    await sleep(5000)
 
     // auto location
-    // driver.findElement(By.id("calc-distance-to-moon-auto")).click();
-    // let longitude = await driver.findElement(By.id('auto-longitude')).getAttribute("value");
-    // let latitude = await driver.findElement(By.id('auto-latitude')).getAttribute("value");
-    // distanceToMoon = await driver.findElement(By.id('distance-to-moon')).getAttribute("value");
-    // if (navigator.geolocation) {
-    //     navigator.geolocation.getCurrentPosition((position) => {
-    //         lon = position.coords.longitude;
-    //         lat = position.coords.latitude;
-    //     });
-    // }
-    // try {
-    //     assert.strictEqual(longitude, lon);
-    //     assert.strictEqual(latitude, lat);
-    // } catch(error) {
-    //     console.log("Error: ", error);
-    //     console.log("Error: ", "Displayed longitude and latitude do not match real values");
-    // }
-    // try {
-    //     assert.Equal(distanceToMoon, sunCalc.getMoonPosition(new Date(), lon, lat)['distance']);
-    // } catch(error) {
-    //     console.log("Error: ", error);
-    //     console.log("Error: ", "Auto: Calculated distance to moon does not match real distance to moon");
-    // }
-    // driver.findElement(By.id("calc-distance-to-moon-auto")).click();
+    driver.findElement(By.id("calc-distance-to-moon-auto")).click();
+    let longitude = await driver.findElement(By.id('auto-longitude')).getAttribute("value");
+    let latitude = await driver.findElement(By.id('auto-latitude')).getAttribute("value");
+    distanceToMoon = await driver.findElement(By.id('distance-to-moon')).getAttribute("value");
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+            lon = position.coords.longitude;
+            lat = position.coords.latitude;
+        });
+    }
+    try {
+        assert.strictEqual(longitude, lon);
+        assert.strictEqual(latitude, lat);
+    } catch(error) {
+        console.log("Error: ", error);
+        console.log("Error: ", "Displayed longitude and latitude do not match real values");
+    }
+    try {
+        assert.strictEqual(distanceToMoon, Math.round(sunCalc.getMoonPosition(new Date(), lon, lat)['distance']).toString());
+    } catch(error) {
+        console.log("Error: ", error);
+        console.log("Error: ", "Auto: Calculated distance to moon does not match real distance to moon");
+    }
 }
 
 async function main() {
     let chrome = await new Builder().forBrowser("chrome").build();
-   // await verifyFields(chrome);
+    //await verifyFields(chrome);
     await verifyAutoLocationAndDistanceToTerrestrialNorthPole(chrome);
     //await verifyMoonDistance(chrome);
     // let lon;
