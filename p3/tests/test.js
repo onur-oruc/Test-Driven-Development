@@ -1,10 +1,7 @@
 const { Builder, By, Key, util } = require("selenium-webdriver");
 const assert = require("assert");
-const { accessSync } = require("fs");
 var sunCalc = require('suncalc');
 const { Navigator } = require('node-navigator');
-const { clear } = require("console");
-const { resolve } = require("path");
 const navigator = new Navigator();
 
 async function sleep(ms) {
@@ -227,7 +224,6 @@ async function verifyFields(driver) {
         driver.findElement(By.id('country')).getText().then(function(country) {
             try {
                 assert.strictEqual(country, correctFormattedLatLng[i].country);
-                console.log("inside try");
             } catch(error) {
                 console.log("Error: ", error);
                 isCorrectCountry = false;
@@ -259,8 +255,6 @@ async function verifyAutoLocationAndDistanceToTerrestrialNorthPole(driver) {
                 lat = position.latitude;
                 expectedDistance = (90-lat)*111
                 try {
-                    console.log("real",response)
-                    console.log("expected",expectedDistance)
                     assert((Math.abs(expectedDistance-response)/expectedDistance)<=1);
                 } catch(error) {
                     console.log("Error: ", error);
@@ -274,8 +268,6 @@ async function verifyAutoLocationAndDistanceToTerrestrialNorthPole(driver) {
             });
         }
     })
-
-    console.log("end of t2");
 }
 
 
@@ -345,13 +337,6 @@ async function verifyMoonDistance(driver) {
         });
     }
     try {
-        assert.strictEqual(longitude, lon);
-        assert.strictEqual(latitude, lat);
-    } catch(error) {
-        console.log("Error: ", error);
-        console.log("Error: ", "Displayed longitude and latitude do not match real values");
-    }
-    try {
         assert.strictEqual(distanceToMoon, Math.round(sunCalc.getMoonPosition(new Date(), lon, lat)['distance']).toString());
     } catch(error) {
         console.log("Error: ", error);
@@ -361,20 +346,9 @@ async function verifyMoonDistance(driver) {
 
 async function main() {
     let chrome = await new Builder().forBrowser("chrome").build();
-    //await verifyFields(chrome);
+    await verifyFields(chrome);
     await verifyAutoLocationAndDistanceToTerrestrialNorthPole(chrome);
-    //await verifyMoonDistance(chrome);
-    // let lon;
-    // let lat;
-    
-    // navigator.geolocation.getCurrentPosition((position) => {
-    //     lon = position.longitude;
-    //     lat = position.latitude;
-    //     console.log("latitude: ", lat);
-    //     console.log("longitude: ", lon);
-    //     console.log("distance: " + sunCalc.getMoonPosition(new Date(), lat,  lon).distance);
-        
-    // });
+    await verifyMoonDistance(chrome);
 
     await chrome.quit();
 }
