@@ -200,11 +200,13 @@ function App() {
           {/* display information */}
           <div className='App_InformationLabels'>
             <InputLabel>Latitude:&nbsp;&nbsp;</InputLabel>
-            <InputLabel id="auto-latitude">{latitude}</InputLabel>
+            <InputLabel id="auto-latitude"
+                        value={latitude}>{latitude}</InputLabel>
           </div>
           <div className='App_InformationLabels'>
             <InputLabel>Longitude:&nbsp;&nbsp;</InputLabel>
-            <InputLabel id="auto-longitude">{longitude}</InputLabel>
+            <InputLabel id="auto-longitude"
+                        value={longitude}>{longitude}</InputLabel>
           </div>
           <div className='App_InformationLabels'>
             <FormLabel
@@ -213,6 +215,7 @@ function App() {
             <FormLabel 
                 id="city"
                 color='primary'
+                value={formattedAddress}
               >{formattedAddress}</FormLabel>
             {/* <InputLabel>Location:&nbsp;&nbsp;</InputLabel>
             <InputLabel id="city">{formattedAddress}</InputLabel> */}
@@ -224,16 +227,22 @@ function App() {
             <FormLabel 
               id="country"
               color='primary'
+              value={country}
             >{country}</FormLabel>
           </div>
           <div className='App_InformationLabels'>
             <InputLabel>Distance to North Pole:&nbsp;&nbsp;</InputLabel>
-            <InputLabel id="north-pole-distance">{distanceToNorthPole}</InputLabel>
+            <InputLabel 
+              id="north-pole-distance"
+              value={distanceToNorthPole}>{distanceToNorthPole}</InputLabel>
             <InputLabel>&nbsp;km</InputLabel>
           </div>
           <div className='App_InformationLabels'>
             <InputLabel>Distance to Moon:&nbsp;&nbsp;</InputLabel>
-            <InputLabel id="distance-to-moon">{distanceToMoon}</InputLabel>
+            <InputLabel 
+              id="distance-to-moon"
+              value={distanceToMoon}
+              >{distanceToMoon}</InputLabel>
             <InputLabel>&nbsp;km</InputLabel>
           </div>
         </div>
